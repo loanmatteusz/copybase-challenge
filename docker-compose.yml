@@ -1,0 +1,28 @@
+version: '3.7'
+
+services:
+    backend:
+        container_name: backend
+        build:
+            dockerfile: Dockerfile
+            context: ./backend
+        ports:
+            - 3000:3000
+        networks:
+            - default_services_network
+    frontend:
+        container_name: frontend
+        build:
+            dockerfile: Dockerfile
+            context: ./frontend
+    revproxy:
+        build:
+            dockerfile: Dockerfile
+            context: ./frontend/.nginx
+        ports:
+            - '80:80'
+
+
+networks:
+    default_services_network:
+        name: copybase-services
