@@ -1,26 +1,29 @@
-import React, { ChangeEvent } from 'react';
-import { Input } from '@mantine/core';
+import React, { useEffect, useState } from 'react';
+import { Box, FileInput } from '@mantine/core';
 
 interface FileUploadProps {
   onFileSelected: (file: File) => void;
+  placeholder: string;
 }
 
-export const Upload: React.FC<FileUploadProps> = ({ onFileSelected }) => {
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files && e.target.files[0];
+export const Upload: React.FC<FileUploadProps> = ({ onFileSelected, placeholder }) => {
+  const [value, setValue] = useState<File | null>(null);
 
-    if (selectedFile) {
-      onFileSelected(selectedFile);
+  useEffect(() => {
+    if (value) {
+      onFileSelected(value);
     }
-  };
+  }, [value]);
 
   return (
-    <div>
-      <h2>Upload de Arquivos</h2>
-      <Input
-        type="file"
-        onChange={handleFileChange}
-      />
-    </div>
+    <Box h={140}>
+        <FileInput
+          accept=''
+          value={value}
+          onChange={setValue}
+          placeholder={placeholder}
+          size='xl'
+        />
+    </Box>
   );
 }

@@ -1,8 +1,9 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Chart from 'chart.js/auto';
 
 export const BarChart: React.FC<{ data: number[], labels: string[] }> = ({ data, labels }) => {
   const chartRef = useRef<HTMLCanvasElement | null>(null);
+  const [chart, setChart] = useState<Chart>();
 
   useEffect(() => {
     if (chartRef.current) {
@@ -23,9 +24,16 @@ export const BarChart: React.FC<{ data: number[], labels: string[] }> = ({ data,
               y: {
                 beginAtZero: true,
               }
-            }
+            },
+            plugins: {
+              legend: {
+                onClick: () => {}, // Desativa a ação de clique na legenda
+              },
+            },
           },
         });
+
+        setChart(barChart);
 
         return () => {
           barChart.destroy();
@@ -34,9 +42,25 @@ export const BarChart: React.FC<{ data: number[], labels: string[] }> = ({ data,
     }
   }, [data, labels]);
 
+  useEffect(() => {
+    const resizeObserver = new ResizeObserver(() => {
+      if (chart) {
+        chart.resize();
+      }
+    });
+
+    if (chartRef.current) {
+      resizeObserver.observe(chartRef.current);
+    }
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [chart]);
+
   return (
-    <>
-      <canvas ref={chartRef} width="1200" height="600"></canvas>
-    </>
+    <div style={{ position: 'relative', width: '100%', maxWidth: '1200px', height: 'auto' }}>
+      <canvas ref={chartRef}></canvas>
+    </div>
   );
 }
