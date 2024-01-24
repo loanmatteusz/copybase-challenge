@@ -12,7 +12,7 @@ Exemplo:
 | 1 | João  | 2023-01-01 | 2023-03-15 | plan_2 | R$ 15,00 |
 | 2 | Maria | 2023-02-10 | | plan_1 | R$ 10,00 |
 
-- [Baixe aqui um arquivo para Teste]([file.xlsx](https://docs.google.com/spreadsheets/d/1YGf7-UjiPmWhNzmNoL6txw3n-YD3cHQLUy1DV48Exis/edit?usp=sharing))
+- [Baixe aqui um arquivo para Teste](https://docs.google.com/spreadsheets/d/1YGf7-UjiPmWhNzmNoL6txw3n-YD3cHQLUy1DV48Exis/edit?usp=sharing)
 
 # Documentação
 `http://localhost:3000/api/v1/docs` para acessar a documentação da API feita com o Swagger
