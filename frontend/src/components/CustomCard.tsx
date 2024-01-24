@@ -21,10 +21,10 @@ export const CustomCard = ({ title, value }: CustomCardInterface) => {
       <Text
         size="xl"
         fw="bold"
-        c="blue"
+        c={ value >= 0 ? "blue" : "red" }
       >
         {
-          value.toLocaleString('pt-BR', {
+          Math.abs(value).toLocaleString('pt-BR', {
             style: 'currency',
             currency: 'BRL'
           })

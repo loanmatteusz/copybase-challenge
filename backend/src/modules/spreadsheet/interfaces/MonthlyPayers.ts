@@ -1,6 +1,6 @@
 import { Subscriber } from "./Subscriber";
 
 export interface MonthlyPayers {
-  month: string;
+  yearMonth: string;
   payers: Subscriber[];
 }

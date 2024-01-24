@@ -11,25 +11,24 @@ import './App.css';
 
 function App() {
   const [data, setData] = useState<CustomResponse>();
+  const [loading, setLoading] = useState<boolean>(false);
 
   const onFileSelected = async (fileSelected: File) => {
     const formData = new FormData();
     formData.append('file', fileSelected);
     try {
+      setLoading(true);
       const response = await axios.post(URL, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
+      setLoading(false);
       setData(response.data);
     } catch (error) {
       console.log({ error });
     }
   }
-
-  useEffect(() => {
-    console.log({ data });
-  }, [data]);
 
   return (
     <>
@@ -45,7 +44,7 @@ function App() {
           >
             Just get a .xlsx or .csv file
           </Text>
-          <Upload onFileSelected={onFileSelected} placeholder='Choose your file .xlsx or .csv' />
+          <Upload onFileSelected={onFileSelected} placeholder='Choose your file .xlsx or .csv' fileLoading={loading} />
         </Flex>
       }
       {

@@ -6,11 +6,11 @@ export class SpreadsheetResponse {
   totalMrr: number;
 
   @ApiProperty({ example: 357 })
-  newMrr: number;
+  newMrrValue: number;
 
   @ApiProperty({ example: 90 })
-  churnMrr: number;
+  churnMrrValue: number;
 
   @ApiProperty({ isArray: true, example: [{ month: "2023-01", totalMonthlyMrr: 235 }] })
-  mrrByMonth: MrrByMonth[];
+  payersByMonth: MrrByMonth[];
 }

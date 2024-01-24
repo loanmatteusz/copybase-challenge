@@ -16,23 +16,33 @@ export class SpreadsheetService {
       const payerByMonth = this.getPaymentByMonth(subscribers);
       const months = Array.from(Object.keys(payerByMonth));
       const monthlyPayers: MonthlyPayers[] = months.map((month: string) => ({
-        month,
+        yearMonth: month,
         payers: payerByMonth[month],
       }));
 
       const plans = this.getSubscribersPlans(subscribers);
-      const mrrByMonth = this.getMrrByMonth(monthlyPayers, plans);
-      const totalMrr = mrrByMonth.reduce((acc, curr) => acc + curr.totalMonthlyMrr, 0);
+      const payersByMonth = this.getMrrByMonth(monthlyPayers, plans);
 
-      const currMonth = months.find(month => (new Date(`${month}-29`).getMonth()) === new Date().getMonth());
-      const newMrr = this.getNewMrr(monthlyPayers, currMonth);
-      const churnMrr = this.getChurnMrr(monthlyPayers, currMonth);
+      const totalMrr = payersByMonth.reduce((acc, curr) => acc + curr.totalMonthlyMrr, 0);
 
+      const currYearMonth = months.find(monthly => {
+        const [year, month] = monthly.split("-");
+        const dateBymonthly = new Date(Number(year), Number(month)-1);
+        const today = new Date();
+        return (dateBymonthly.getFullYear() === today.getFullYear() && dateBymonthly.getMonth() === today.getMonth())
+      });
+
+      const { newMrrValue } = this.getNewMrr(monthlyPayers, currYearMonth);
+      
+      const cancelSubs = subscribers.filter(payer => payer.cancel_date);
+
+      const { cancelValue: churnMrrValue } = this.getChurnMrr(cancelSubs, currYearMonth);
+      
       return {
         totalMrr,
-        newMrr,
-        churnMrr,
-        mrrByMonth,
+        newMrrValue,
+        churnMrrValue,
+        payersByMonth,
       }
     } catch (error) {
       throw new BadRequestException(error.message);
@@ -55,7 +65,7 @@ export class SpreadsheetService {
       const mrrByPlan = plans.map(plan => this.getMrrByPlan(plan, monthlyPayer.payers));
       const totalMonthlyMrr = mrrByPlan.reduce((acc, curr) => acc + curr, 0);
       return {
-        month: monthlyPayer.month,
+        yearMonth: monthlyPayer.yearMonth,
         totalMonthlyMrr,
       }
     });
@@ -90,24 +100,36 @@ export class SpreadsheetService {
     return payerByMonth;
   }
 
-  private getNewMrr(monthlyPayers: MonthlyPayers[], currMonth: string) {
-    return monthlyPayers
-      .find(monthlyPayer => monthlyPayer.month === currMonth)
-      .payers.reduce((acc, curr) => acc + curr.payment, 0);
+  private formatMonth = (month: number) => month < 10 ? `0${month}` : month;
+
+  private getNewMrr(monthlyPayers: MonthlyPayers[], currYearMonth: string) {
+    const monthlyPayersInThisMonth = monthlyPayers
+      .find(monthlyPayer => monthlyPayer.yearMonth === currYearMonth)
+      .payers;
+    const newMrrValue = monthlyPayersInThisMonth
+      .reduce((acc, curr) => acc + curr.payment, 0);
+    const newPayersQuantity = monthlyPayersInThisMonth.filter(payer => {
+      const payerRegistration = new Date(payer.register_date);
+      
+      const payerYearMonth = `${payerRegistration.getFullYear()}-${this.formatMonth(payerRegistration.getMonth()+1)}`
+      return payerYearMonth === currYearMonth;
+    });
+    return {
+      newMrrValue,
+      newPayers: newPayersQuantity.length,
+    }
   }
 
-  private getChurnMrr(monthlyPayers: MonthlyPayers[], currMonth: string): number {
-    return monthlyPayers.
-      map(monthlyPayer => {
-        const payers = monthlyPayer.payers.filter(payer => {
-          const cancelDateMonth = new Date(payer.cancel_date).getMonth();
-          const currDateMonth = new Date(`${currMonth}-29`).getMonth();
-          return cancelDateMonth === currDateMonth ?? payer;
-        });
-        const payer = payers.find(payer => payer.cancel_date);
-        return payer;
-      })
-      .filter(payer => payer)
+  private getChurnMrr(cancelSubscribers: Subscriber[], currMonth: string): {cancelValue: number, cancelPayers: number} {
+    const cancelSubsInThisMonth = cancelSubscribers
+      .filter(sub => new Date(sub.cancel_date).getMonth() === new Date(`${currMonth}-29`).getMonth());
+
+    const cancelValue = cancelSubsInThisMonth
       .reduce((acc, curr) => acc + curr.payment, 0);
+
+    return {
+      cancelValue,
+      cancelPayers: cancelSubsInThisMonth.length,
+    }
   }
 }

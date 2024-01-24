@@ -11,23 +11,33 @@ import { URL } from "../constraints/url";
 
 
 export const Dash: React.FC<{ data: CustomResponse }> = ({ data }) => {
-  const labels = data.mrrByMonth.map(mrr => mrr.month);
-  const mrrData = data.mrrByMonth.map(mrr => mrr.totalMonthlyMrr);
+  const labels = data.payersByMonth.map(mrr => mrr.yearMonth);
+  const mrrData = data.payersByMonth.map(mrr => mrr.totalMonthlyMrr);
 
+  const [loading, setLoading] = useState<boolean>(false);
   const [reupload, setReupload] = useState<CustomResponse>();
   const onFileSelected = async (fileSelected: File) => {
     const formData = new FormData();
     formData.append('file', fileSelected);
     try {
+      setLoading(true);
       const response = await axios.post(URL, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
       setReupload(response.data);
+      setLoading(false);
     } catch (error) {
       console.log({ error });
     }
+  }
+
+  const getChrunMrr = (value: number) => {
+    if (value === 0) {
+      return value;
+    }
+    return (-value)
   }
 
   return (
@@ -38,8 +48,8 @@ export const Dash: React.FC<{ data: CustomResponse }> = ({ data }) => {
         justify="space-between"
       >
         <CustomCard title="Total MRR" value={reupload?.totalMrr || data.totalMrr} />
-        <CustomCard title="New MRR" value={reupload?.newMrr || data.newMrr} />
-        <CustomCard title="Chrun MRR" value={reupload?.churnMrr || data.churnMrr} />
+        <CustomCard title="New MRR" value={reupload?.newMrrValue || data.newMrrValue} />
+        <CustomCard title="Chrun MRR" value={getChrunMrr(reupload?.churnMrrValue || data.churnMrrValue)} />
         <Card
           shadow="sm" padding="md" radius="sm"
           w={240}
@@ -54,14 +64,15 @@ export const Dash: React.FC<{ data: CustomResponse }> = ({ data }) => {
           <Upload
             onFileSelected={onFileSelected}
             placeholder="Choose other file"
+            fileLoading={loading}
           />
         </Card>
       </Group>
       {
         reupload ?
           <BarChart
-            data={reupload.mrrByMonth.map(mrr => mrr.totalMonthlyMrr)}
-            labels={reupload.mrrByMonth.map(mrr => mrr.month)}
+            data={reupload.payersByMonth.map(mrr => mrr.totalMonthlyMrr)}
+            labels={reupload.payersByMonth.map(mrr => mrr.yearMonth)}
           /> :
           <BarChart
             data={mrrData}

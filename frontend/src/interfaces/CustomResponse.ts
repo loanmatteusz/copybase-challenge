@@ -1,11 +1,12 @@
 export interface MrrByMonth {
-  month: string;
+  yearMonth: string;
+  newPayers: number;
   totalMonthlyMrr: number;
 }
 
 export interface CustomResponse {
   totalMrr: number;
-  newMrr: number;
-  churnMrr: number;
-  mrrByMonth: MrrByMonth[];
+  newMrrValue: number;
+  churnMrrValue: number;
+  payersByMonth: MrrByMonth[];
 }

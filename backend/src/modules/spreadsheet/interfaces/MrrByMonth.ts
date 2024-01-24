@@ -1,4 +1,4 @@
 export interface MrrByMonth {
-  month: string;
+  yearMonth: string;
   totalMonthlyMrr: number;
 }
