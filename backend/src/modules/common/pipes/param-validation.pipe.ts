@@ -6,7 +6,6 @@ export class ParamValidation implements PipeTransform {
     if (!value) {
       throw new BadRequestException(`The query value of ${metadata.data} should not be empty!`);
     }
-    console.log({ value, metadata });
     return value;
   }
 
